@@ -7,7 +7,7 @@ const shouldAnalyseBundle = process.env.ANALYSE_BUNDLE
 module.exports = {
   siteMetadata: {
        // Used for the title template on pages other than the index site
-       siteTitle: `Kolvin`,
+       siteTitle: `Kolv.in`,
        // Default title of the page
        siteTitleAlt: `Home`,
        // Can be used for e.g. JSONLD
@@ -42,11 +42,7 @@ module.exports = {
           {
             name: `Twitter`,
             url: `https://twitter.com/_kolvin`,
-          },
-          {
-            name: `Instagram`,
-            url: `https://www.instagram.com/lekoarts.de/`,
-          },
+          }
         ],
       },
     },
