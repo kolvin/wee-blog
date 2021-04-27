@@ -1,0 +1,45 @@
+---
+title: How i dockerize an application
+date: 2021-04-23
+description:
+tags:
+  - Docker
+  - Symfony
+banner: ./defence-against-the-dark-arts.jpg
+---
+> ## Dockerize?
+> Dockerizing is the process of building and packing an application, so it is ready to be shipped.
+
+___
+
+My aim for this article is to share the **abstract concepts** that I've noticed as I've been responsible
+for developing & shipping products.
+
+In quick summary, containerization is the fucking shit and you should be using it everywhere!
+____
+### Abstract Concepts
+- base image
+- runtime configuration
+- application dependencies
+- runtime dependencies
+
+
+##### 1. Base Image
+Our base image will most likely be influenced by the target application's technical requirements.
+IE;
+- With a Symfony application, I would look into using php-fpm as my base image
+- With a React, Vue application, I would look into using Node
+- With a Springboot application, I would look into using a Java as my base image
+
+So by understanding the applications runtime requirements, we are then able to start scaffolding the image and what OS flavor we use.
+
+
+##### 2. Runtime Configuration
+
+
+
+##### 3. Application Dependencies
+Typically, tools like composer, npm, yarn, gem
+
+##### 4. Runtime Dependencies
+Typically, language extensions like php-xml
