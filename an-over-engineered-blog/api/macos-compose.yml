@@ -1,0 +1,63 @@
+version: '3'
+
+networks:
+  an-over-engineered-blog:
+    name: an-over-engineered-blog
+
+volumes:
+  app_nfsmount:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=host.docker.internal,rw,nolock,hard,nointr,nfsvers=3
+      device: ":/System/Volumes/Data/${PWD}/app"
+
+  app_public_nfsmount:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=host.docker.internal,rw,nolock,hard,nointr,nfsvers=3
+      device: ":/System/Volumes/Data/${PWD}/app/public"
+
+services:
+  nginx:
+    container_name: ${PROJECT_NAME}-nginx
+    restart: unless-stopped
+    image: nginx
+    healthcheck:
+      test: ["CMD", "service", "nginx", "status"]
+      timeout: 5s
+      retries: 5
+    ports:
+      - 80:80
+    environment:
+      NGINX_HOST: ${DOMAIN}
+      NGINX_PORT: '80'
+      PROJECT_NAME: ${PROJECT_NAME}
+    networks:
+      - an-over-engineered-blog
+    volumes:
+      - ./.docker/config/nginx/templates:/etc/nginx/templates:cached
+      - ./.docker/config/nginx/nginx.conf:/etc/nginx/nginx.conf:cached
+      - app_public_nfsmount:/var/www/${PROJECT_NAME}/public:cached
+    depends_on:
+      php-fpm:
+        condition: service_started
+
+  php-fpm:
+    build:
+      context: .
+      dockerfile: .docker/services/php/Dockerfile
+      args:
+        PROJECT_NAME: ${PROJECT_NAME}
+        BUILD_ENV: ${BUILD_ENV}
+    container_name: ${PROJECT_NAME}-php-fpm
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: unless-stopped
+    volumes:
+      - ./.docker/config/php/php.ini.development:/usr/local/etc/php.ini
+      - app_nfsmount:/var/www/${PROJECT_NAME}
+    networks:
+      - an-over-engineered-blog

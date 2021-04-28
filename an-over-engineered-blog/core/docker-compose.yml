@@ -1,0 +1,41 @@
+version: '3'
+
+networks:
+  an-over-engineered-blog:
+    name: an-over-engineered-blog
+
+services:
+  database:
+    container_name: ${PROJECT_NAME}-mysql
+    restart: unless-stopped
+    image: mysql:5.7
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ~/.container-data/database/mysql/57/${PROJECT_NAME}/:/var/lib/mysql
+    networks:
+      - an-over-engineered-blog
+
+  php-fpm:
+    build:
+      context: .
+      dockerfile: .docker/services/php/Dockerfile
+      args:
+        PROJECT_NAME: ${PROJECT_NAME}
+        BUILD_ENV: ${BUILD_ENV}
+    container_name: ${PROJECT_NAME}-${SERVICE_NAME}-consumer
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: unless-stopped
+    volumes:
+      - ./.docker/config/php/php.ini.development:/usr/local/etc/php.ini
+      - ./app:/var/www/${PROJECT_NAME}
+    networks:
+      - an-over-engineered-blog

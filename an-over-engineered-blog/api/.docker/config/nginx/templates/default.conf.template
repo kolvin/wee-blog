@@ -1,0 +1,30 @@
+server {
+    listen ${NGINX_PORT};
+    server_name ${NGINX_HOST};
+
+    root /var/www/${SERVICE_NAME}/public;
+
+    index /index.php;
+    error_page 404 /index.php;
+
+    location / {
+        try_files $uri $uri/ /index.php;
+    }
+
+    location ~ ^/.+\.php(/|$) {
+        fastcgi_pass php-fpm:9000;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+
+    location /php-fpm-status {
+        access_log off;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_pass php-fpm:9000;
+        fastcgi_index status.html;
+    }
+
+    error_log "/var/log/nginx/dev_${SERVICE_NAME}_error.log";
+    access_log "/var/log/nginx/dev_${SERVICE_NAME}_access.log";
+}
