@@ -1,0 +1,120 @@
+---
+title: php inline native datetime formatting
+date: 2021-11-27
+description: useful for working with native date manipulation in php
+tags:
+  - php8
+  - tip
+banner: ./time-travel.jpg
+---
+> [Source tweet](https://twitter.com/SteveTheBauman/status/1448050987571220486)
+>
+> Any thoughts? annoy me on Twitter
+>
+> **Note:** this mechanism does not seem to reset the objects' timezone - [example](https://3v4l.org/oOLk9)
+
+
+___
+![oh no not datetimes](./time-travel.jpg)
+
+#### With ! in our formatting we can create native datetime objects with;
+ - zero-like values for time - [0 for hour, minute, second and fraction](https://github.com/php/doc-en/blob/master/reference/datetime/datetime/createfromformat.xml#L259-L274)
+ - start-like values for days/months/weeks - [1 for month and day](https://github.com/php/doc-en/blob/master/reference/datetime/datetime/createfromformat.xml#L259-L274)
+
+INSTEAD of using the current datetime value;
+
+Not using `!` will set the current time
+```php
+\DateTimeImmutable::createFromFormat(
+    format: 'Y-m-d',
+    datetime: '2021-11-27',
+    timezone: new \DateTimeZone('Europe/London')
+);
+
+// 2021-11-27 16:36:00.0 Europe/London (+00:00)
+```
+---
+This format sets the time values to `00:00:00:0`
+```php
+\DateTimeImmutable::createFromFormat(
+    format: '!Y-m-d',
+    datetime: '2021-11-27',
+    timezone: new \DateTimeZone('Europe/London')
+);
+
+// 2021-11-27 00:00:00.0 Europe/London (+00:00)
+```
+---
+This format sets the time values to `12:00:00:0`
+```php
+\DateTimeImmutable::createFromFormat(
+    format: '!Y-m-d H',
+    datetime: '2021-11-27 12',
+    timezone: new \DateTimeZone('Europe/London')
+);
+
+// 2021-11-27 12:00:00.0 Europe/London (+00:00)
+```
+---
+This formats the Year and Month and sets the day to a sensible 1
+
+This also sets the time values to `00:00:00:0`
+```php
+\DateTimeImmutable::createFromFormat(
+    format: '!Y-m',
+    datetime: '2021-11',
+    timezone: new \DateTimeZone('Europe/London')
+);
+
+// 2021-11-01 00:00:00.0 Europe/London (+00:00)
+```
+
+___
+
+#### Alternatively we can use the pipe | to achieve the same effect only difference is its located at the end of our format string;
+
+
+
+Similarly, Not using `|` will set the current time
+```php
+\DateTimeImmutable::createFromFormat(
+    format: 'Y-m-d',
+    datetime: '2021-11-27',
+    timezone: new \DateTimeZone('Europe/London')
+);
+
+// 2021-11-27 16:36:00.0 Europe/London (+00:00)
+```
+
+This format sets the time values to `00:00:00:0`
+```php
+\DateTimeImmutable::createFromFormat(
+    format: 'Y-m-d|',
+    datetime: '2021-11-27',
+    timezone: new \DateTimeZone('Europe/London')
+);
+
+// 2021-11-27 00:00:00.0 Europe/London (+00:00)
+```
+
+This format sets the time values to `12:00:00:0`
+```php
+\DateTimeImmutable::createFromFormat(
+    format: 'Y-m-d H|',
+    datetime: '2021-11-27 12',
+    timezone: new \DateTimeZone('Europe/London')
+);
+
+// 2021-11-27 12:00:00.0 Europe/London (+00:00)
+```
+This format sets the time values to `12:30:00:0`
+```php
+\DateTimeImmutable::createFromFormat(
+    format: 'Y-m-d H:i|',
+    datetime: '2021-11-27 12:30',
+    timezone: new \DateTimeZone('Europe/London')
+);
+// 2021-11-27 12:30:00.0 Europe/London (+00:00)
+```
+
+Hopefully this helps you like it did me! i never knew you could format like this, which will make it a little quicker to create tests and control fixtures dates
